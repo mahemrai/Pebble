@@ -21,6 +21,7 @@ color[] colors = {
   #9e9881
 };
 
+// range of velocity values that can be randomly selected and applied
 int[] velocityValues = {0, 2, -2, 4, -4, 6, -6};
 
 void setup() {
@@ -52,19 +53,22 @@ void draw() {
     
   track();
   
+  // apply post processor effects to the sketch
   fx.render()
     .bloom(0.3, 20, 30)
     .blur(2, 2)
     .compose();
 }
 
+/**
+ * Add centroids randomly in the canvas.
+ */
 void addCentroids() {
   for (int i=0; i < 7; i++) {    
     FCircle c = new FCircle(40);
     
     c.setName("Centroid");
     
-    // place centroids randomly in the canvas
     float posX = random(120, 680);
     float posY = random(120, 680);
     
@@ -86,6 +90,9 @@ void addCentroids() {
   }
 }
 
+/**
+ * Add particles randomly in the canvas
+ */
 void addParticles() {
   for (int i=0; i < 600; i++) {
     FCircle c = new FCircle(6);
@@ -98,7 +105,8 @@ void addParticles() {
     c.setPosition(posX, posY);
     
     c.setGrabbable(false);
-        
+    
+    // generate random movement speed for each particle
     int indexX = int(random(velocityValues.length));
     int indexY = int(random(velocityValues.length));
     
@@ -117,6 +125,10 @@ void addParticles() {
   }
 }
 
+/**
+ * Calculate distance of each particle with each centroid and update
+ * particle's colour depending on what centroid it is closer to.
+ */
 void track() {
   FCircle centroid, particle;
   
@@ -147,10 +159,14 @@ void track() {
   }
 }
 
+/**
+ * Handle collision with edges to workout how each body should deflect.
+ */
 void contactStarted(FContact contact) {
   FBody body1 = contact.getBody1();
   FBody body2 = contact.getBody2();
   
+  // check to ensure the collision is with edges
   if (body1.getName() != "Centroid" && body1.getName() != "Particle") {
     float contactX = contact.getX();
     float contactY = contact.getY();
@@ -169,6 +185,7 @@ void contactStarted(FContact contact) {
     body2.setVelocity(newVelX, newVelY);
   }
   
+  // check to ensure collision is with edges
   if (body2.getName() != "Centroid" && body2.getName() != "Particle") {
     float contactX = contact.getX();
     float contactY = contact.getY();
