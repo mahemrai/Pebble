@@ -103,10 +103,10 @@ void addCentroids() {
  * Add particles randomly in the canvas
  */
 void addParticles() {
-  int numOfParticles = (int) random(100, 600);
+  int numOfParticles = (int) random(100, 450);
   
   for (int i=0; i < numOfParticles; i++) {
-    int radius = (int) random(5, 15);
+    int radius = (int) random(2, 15);
     FCircle c = new FCircle(radius);
     
     c.setName("Particle");
