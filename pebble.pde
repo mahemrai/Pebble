@@ -16,12 +16,16 @@ color[] colors = {
   #6dd171,
   #f78944,
   #298ebb,
-  #f53336
-}; 
+  #f53336,
+  #ce558a,
+  #9e9881
+};
+
+int[] velocityValues = {0, 12, -12, 15, -15, 8, -8, 20, -20, 4, -4};
 
 void setup() {
   size(800, 800, P2D);
-  smooth();
+  smooth(8);
   
   fx = new PostFX(this);
   
@@ -30,8 +34,6 @@ void setup() {
   
   // switch off gravity
   world.setGravity(0,0);
-  // objects cannot be grabbed
-  world.setGrabbable(false);
   
   // no effect on velocity of moving objects
   world.setEdgesFriction(0);
@@ -47,16 +49,17 @@ void draw() {
   
   world.step();
   world.draw();
-  
+    
   track();
   
   fx.render()
     .bloom(0.3, 20, 30)
+    .blur(2, 2)
     .compose();
 }
 
 void addCentroids() {
-  for (int i=0; i < 5; i++) {    
+  for (int i=0; i < 7; i++) {    
     FCircle c = new FCircle(40);
     
     c.setName("Centroid");
@@ -66,14 +69,17 @@ void addCentroids() {
     float posY = random(120, 680);
     
     c.setPosition(posX, posY);
+    
+    c.setGrabbable(false);
+    c.setRotatable(false);
+    c.setStatic(true);
         
     c.setFriction(0);
     c.setRestitution(0);
     c.setDamping(0);
     c.setAngularDamping(0);
     
-    c.setStrokeColor(colors[i]);
-    c.setStrokeWeight(5);
+    c.setNoStroke();
     c.setFillColor(colors[i]);
     
     world.add(c);
@@ -82,10 +88,8 @@ void addCentroids() {
 }
 
 void addParticles() {
-  int[] velocityValues = {0, 12, -12, 15, -15, 8, -8};
-  
-  for (int i=0; i < 100; i++) {
-    FCircle c = new FCircle(10);
+  for (int i=0; i < 2000; i++) {
+    FCircle c = new FCircle(6);
     
     c.setName("Particle");
     
@@ -93,6 +97,8 @@ void addParticles() {
     float posY = random(20, 780);
     
     c.setPosition(posX, posY);
+    
+    c.setGrabbable(false);
         
     int indexX = int(random(velocityValues.length));
     int indexY = int(random(velocityValues.length));
@@ -116,7 +122,7 @@ void track() {
   
   for (int i=0; i < particles.size(); i++) {
     int closestCentroidIndex = -1;
-    float closestDistance = 100;
+    float closestDistance = 150;
         
     particle = particles.get(i);
     
@@ -125,7 +131,7 @@ void track() {
       
       float distance = dist(particle.getX(), particle.getY(), centroid.getX(), centroid.getY());
       
-      distance = distance - (40 + 10);
+      distance = distance - (40 + 6);
       
       if (distance < closestDistance) {
         closestCentroidIndex = j;
@@ -164,5 +170,20 @@ void contactStarted(FContact contact) {
   }
   
   if (body2.getName() != "Centroid" && body2.getName() != "Particle") {
+    float contactX = contact.getX();
+    float contactY = contact.getY();
+        
+    float newVelX = body1.getVelocityX();
+    float newVelY = body1.getVelocityY();
+    
+    if (contactX >= 795 || contactX <= 5) {
+      newVelX = -newVelX;
+    }
+    
+    if (contactY >= 795 || contactY <= 5) {
+      newVelY = -newVelY;
+    }
+    
+    body1.setVelocity(newVelX, newVelY);
   }
 }
