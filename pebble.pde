@@ -10,6 +10,7 @@ PostFX fx;
 ArrayList<FCircle> centroids = new ArrayList<FCircle>();
 ArrayList<FCircle> particles = new ArrayList<FCircle>();
 
+// color palette for centroids
 color[] colors = {
   #fde039,
   #6dd171,
@@ -29,9 +30,10 @@ void setup() {
   
   // switch off gravity
   world.setGravity(0,0);
-  
+  // objects cannot be grabbed
   world.setGrabbable(false);
   
+  // no effect on velocity of moving objects
   world.setEdgesFriction(0);
   world.setEdgesRestitution(0);
   world.setEdges();
@@ -41,7 +43,7 @@ void setup() {
 }
 
 void draw() {
-  background(#0c1732);
+  background(0);
   
   world.step();
   world.draw();
@@ -54,13 +56,15 @@ void draw() {
 }
 
 void addCentroids() {
-  for (int i=0; i < 5; i++) {
-    //int random = (int) random(colors.length);
-    
+  for (int i=0; i < 5; i++) {    
     FCircle c = new FCircle(40);
+    
+    c.setName("Centroid");
+    
+    // place centroids randomly in the canvas
     float posX = random(120, 680);
     float posY = random(120, 680);
-    c.setName("Centroid");
+    
     c.setPosition(posX, posY);
         
     c.setFriction(0);
@@ -83,12 +87,13 @@ void addParticles() {
   for (int i=0; i < 100; i++) {
     FCircle c = new FCircle(10);
     
-    float posX = random(20, 780);
-    float posY = random(20, 780);
-    c.setPosition(posX, posY);
-    c.setRotatable(true);
     c.setName("Particle");
     
+    float posX = random(20, 780);
+    float posY = random(20, 780);
+    
+    c.setPosition(posX, posY);
+        
     int indexX = int(random(velocityValues.length));
     int indexY = int(random(velocityValues.length));
     
@@ -99,7 +104,7 @@ void addParticles() {
     c.setDamping(0);
     c.setAngularDamping(0);
     c.setNoStroke();
-    c.setFillColor(#0c1732);
+    c.setFillColor(0);
     
     world.add(c);
     particles.add(c);
@@ -108,9 +113,11 @@ void addParticles() {
 
 void track() {
   FCircle centroid, particle;
-  boolean blackout = false;
   
   for (int i=0; i < particles.size(); i++) {
+    int closestCentroidIndex = -1;
+    float closestDistance = 100;
+        
     particle = particles.get(i);
     
     for (int j=0; j < centroids.size(); j++) {
@@ -118,15 +125,18 @@ void track() {
       
       float distance = dist(particle.getX(), particle.getY(), centroid.getX(), centroid.getY());
       
-      //println("Distance: " + distance);
       distance = distance - (40 + 10);
       
-      if (distance < 10) {
-        particle.setFillColor(centroid.getFillColor());
-        blackout = false;
-      } else if (distance > 30) {
-        blackout = true;
+      if (distance < closestDistance) {
+        closestCentroidIndex = j;
+        closestDistance = distance;
       }
+    }
+    
+    if (closestCentroidIndex > -1) {
+      particle.setFillColor(centroids.get(closestCentroidIndex).getFillColor());
+    } else {
+      particle.setFillColor(0);
     }
   }
 }
