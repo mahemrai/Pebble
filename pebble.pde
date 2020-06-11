@@ -2,10 +2,13 @@ import ch.bildspur.postfx.builder.*;
 import ch.bildspur.postfx.pass.*;
 import ch.bildspur.postfx.*;
 
-import fisica.*; 
+import fisica.*;
 
 FWorld world;
 PostFX fx;
+
+boolean render = true;
+boolean regenerating = false;
 
 ArrayList<FCircle> centroids = new ArrayList<FCircle>();
 ArrayList<FCircle> particles = new ArrayList<FCircle>();
@@ -43,14 +46,20 @@ void setup() {
   
   addCentroids();
   addParticles();
+  //noLoop();
 }
 
 void draw() {
   background(0);
   
+  int seconds = millis()/1000;
+  
+  if (seconds % 30 == 0) {
+    regenerate();
+  }
+  
   world.step();
   world.draw();
-    
   track();
   
   // apply post processor effects to the sketch
@@ -65,7 +74,7 @@ void draw() {
  */
 void addCentroids() {
   for (int i=0; i < 7; i++) {    
-    FCircle c = new FCircle(40);
+    FCircle c = new FCircle(60);
     
     c.setName("Centroid");
     
@@ -94,8 +103,11 @@ void addCentroids() {
  * Add particles randomly in the canvas
  */
 void addParticles() {
-  for (int i=0; i < 600; i++) {
-    FCircle c = new FCircle(6);
+  int numOfParticles = (int) random(100, 600);
+  
+  for (int i=0; i < numOfParticles; i++) {
+    int radius = (int) random(5, 15);
+    FCircle c = new FCircle(radius);
     
     c.setName("Particle");
     
@@ -123,6 +135,19 @@ void addParticles() {
     world.add(c);
     particles.add(c);
   }
+  
+  regenerating = false;
+}
+
+void regenerate() {
+  world.clear();
+  world.setEdges();
+  particles.clear();
+  centroids.clear();
+  addParticles();
+  addCentroids();
+  
+  delay(1000);
 }
 
 /**
@@ -143,7 +168,7 @@ void track() {
       
       float distance = dist(particle.getX(), particle.getY(), centroid.getX(), centroid.getY());
       
-      distance = distance - (40 + 6);
+      distance = distance - (centroid.getSize() + particle.getSize());
       
       if (distance < closestDistance) {
         closestCentroidIndex = j;
@@ -152,9 +177,11 @@ void track() {
     }
     
     if (closestCentroidIndex > -1) {
-      particle.setStrokeColor(centroids.get(closestCentroidIndex).getFillColor());
+      //particle.setStrokeColor(centroids.get(closestCentroidIndex).getFillColor());
+      particle.setFillColor(centroids.get(closestCentroidIndex).getFillColor());
     } else {
-      particle.setStrokeColor(0);
+      //particle.setStrokeColor(0);
+      particle.setFillColor(0);
     }
   }
 }
