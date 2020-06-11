@@ -87,7 +87,7 @@ void addCentroids() {
 }
 
 void addParticles() {
-  for (int i=0; i < 2000; i++) {
+  for (int i=0; i < 600; i++) {
     FCircle c = new FCircle(6);
     
     c.setName("Particle");
@@ -122,7 +122,7 @@ void track() {
   
   for (int i=0; i < particles.size(); i++) {
     int closestCentroidIndex = -1;
-    float closestDistance = 150;
+    float closestDistance = 180;
         
     particle = particles.get(i);
     
