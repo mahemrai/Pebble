@@ -7,6 +7,9 @@ import fisica.*;
 FWorld world;
 PostFX fx;
 
+ArrayList<FCircle> centroids = new ArrayList<FCircle>();
+ArrayList<FCircle> particles = new ArrayList<FCircle>();
+
 color[] colors = {
   #fde039,
   #6dd171,
@@ -38,14 +41,16 @@ void setup() {
 }
 
 void draw() {
-  background(0);
+  background(#0c1732);
   
   world.step();
   world.draw();
   
-  /*fx.render()
-    .bloom(0.3, 20, 20)
-    .compose();*/
+  track();
+  
+  fx.render()
+    .bloom(0.3, 20, 30)
+    .compose();
 }
 
 void addCentroids() {
@@ -68,13 +73,14 @@ void addCentroids() {
     c.setFillColor(colors[i]);
     
     world.add(c);
+    centroids.add(c);
   }
 }
 
 void addParticles() {
   int[] velocityValues = {0, 12, -12, 15, -15, 8, -8};
   
-  for (int i=0; i < 200; i++) {
+  for (int i=0; i < 100; i++) {
     FCircle c = new FCircle(10);
     
     float posX = random(20, 780);
@@ -93,8 +99,35 @@ void addParticles() {
     c.setDamping(0);
     c.setAngularDamping(0);
     c.setNoStroke();
+    c.setFillColor(#0c1732);
     
     world.add(c);
+    particles.add(c);
+  }
+}
+
+void track() {
+  FCircle centroid, particle;
+  boolean blackout = false;
+  
+  for (int i=0; i < particles.size(); i++) {
+    particle = particles.get(i);
+    
+    for (int j=0; j < centroids.size(); j++) {
+      centroid = centroids.get(j);
+      
+      float distance = dist(particle.getX(), particle.getY(), centroid.getX(), centroid.getY());
+      
+      //println("Distance: " + distance);
+      distance = distance - (40 + 10);
+      
+      if (distance < 10) {
+        particle.setFillColor(centroid.getFillColor());
+        blackout = false;
+      } else if (distance > 30) {
+        blackout = true;
+      }
+    }
   }
 }
 
