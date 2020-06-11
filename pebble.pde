@@ -21,7 +21,7 @@ color[] colors = {
   #9e9881
 };
 
-int[] velocityValues = {0, 12, -12, 15, -15, 8, -8, 20, -20, 4, -4};
+int[] velocityValues = {0, 2, -2, 4, -4, 6, -6};
 
 void setup() {
   size(800, 800, P2D);
@@ -72,7 +72,6 @@ void addCentroids() {
     
     c.setGrabbable(false);
     c.setRotatable(false);
-    c.setStatic(true);
         
     c.setFriction(0);
     c.setRestitution(0);
@@ -109,7 +108,8 @@ void addParticles() {
     c.setRestitution(0);
     c.setDamping(0);
     c.setAngularDamping(0);
-    c.setNoStroke();
+    c.setStrokeWeight(1);
+    c.setStrokeColor(0);
     c.setFillColor(0);
     
     world.add(c);
@@ -140,9 +140,9 @@ void track() {
     }
     
     if (closestCentroidIndex > -1) {
-      particle.setFillColor(centroids.get(closestCentroidIndex).getFillColor());
+      particle.setStrokeColor(centroids.get(closestCentroidIndex).getFillColor());
     } else {
-      particle.setFillColor(0);
+      particle.setStrokeColor(0);
     }
   }
 }
