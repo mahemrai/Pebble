@@ -8,19 +8,11 @@ FWorld world;
 PostFX fx;
 
 color[] colors = {
-  #1a429b,
-  #ed3d51,
-  #ce558a,
-  #6cc96d,
-  #ff8943,
-  #ffc13b,
-  #fe5244,
-  #288651,
-  #2c93bb,
-  #a6bcce,
-  #121e34,
-  #ab4343,
-  #545970
+  #fde039,
+  #6dd171,
+  #f78944,
+  #298ebb,
+  #f53336
 }; 
 
 void setup() {
@@ -51,30 +43,29 @@ void draw() {
   world.step();
   world.draw();
   
-  fx.render()
-    .bloom(0.5, 20, 30)
-    .compose();
+  /*fx.render()
+    .bloom(0.3, 20, 20)
+    .compose();*/
 }
 
 void addCentroids() {
   for (int i=0; i < 5; i++) {
-    int random = (int) random(colors.length);
+    //int random = (int) random(colors.length);
     
     FCircle c = new FCircle(40);
-    float posX = random(160, 640);
-    float posY = random(160, 640);
+    float posX = random(120, 680);
+    float posY = random(120, 680);
     c.setName("Centroid");
     c.setPosition(posX, posY);
-    
-    c.setStatic(true);
-    
+        
     c.setFriction(0);
     c.setRestitution(0);
     c.setDamping(0);
     c.setAngularDamping(0);
-    c.setNoStroke();
     
-    c.setFillColor(colors[random]);
+    c.setStrokeColor(colors[i]);
+    c.setStrokeWeight(5);
+    c.setFillColor(colors[i]);
     
     world.add(c);
   }
@@ -83,7 +74,7 @@ void addCentroids() {
 void addParticles() {
   int[] velocityValues = {0, 12, -12, 15, -15, 8, -8};
   
-  for (int i=0; i < 100; i++) {
+  for (int i=0; i < 200; i++) {
     FCircle c = new FCircle(10);
     
     float posX = random(20, 780);
