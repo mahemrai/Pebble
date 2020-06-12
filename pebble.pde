@@ -10,6 +10,8 @@ PostFX fx;
 ArrayList<FCircle> centroids = new ArrayList<FCircle>();
 ArrayList<FCircle> particles = new ArrayList<FCircle>();
 
+int ticker = 0;
+
 // color palette for centroids
 color[] colors = {
   #fde039,
@@ -58,6 +60,7 @@ void draw() {
   world.step();
   world.draw();
   track();
+  hoverCentroids();
   
   // apply post processor effects to the sketch
   fx.render()
@@ -70,6 +73,8 @@ void draw() {
  * Add centroids randomly in the canvas.
  */
 void addCentroids() {
+  int[] centroidVelocity = {2, -2};
+  
   for (int i=0; i < 7; i++) {    
     FCircle c = new FCircle(60);
     
@@ -81,10 +86,10 @@ void addCentroids() {
     c.setPosition(posX, posY);
     
     // generate random movement speed for each particle
-    int indexX = int(random(velocityValues.length));
-    int indexY = int(random(velocityValues.length));
+    //int indexX = int(random(velocityValues.length));
+    int indexY = int(random(centroidVelocity.length));
     
-    c.setVelocity(velocityValues[indexX], velocityValues[indexY]);
+    c.setVelocity(0, centroidVelocity[indexY]);
     
     c.setGrabbable(false);
     c.setRotatable(false);
@@ -140,6 +145,35 @@ void addParticles() {
   }
 }
 
+void hoverCentroids() {
+  for (int i = 0; i < centroids.size(); i++) {
+    FCircle centroid = centroids.get(i);
+    
+    float x = 0;
+    float y = 0;
+    
+    // generate random movement speed for each particle
+    //int indexX = int(random(velocityValues.length));
+    //int indexY = int(random(velocityValues.length));
+    
+    //centroid.setVelocity(velocityValues[indexX], velocityValues[indexY]);
+    
+    if (ticker % 150 == 0) {
+      if (centroid.getVelocityY() < 0) {
+        y = -(centroid.getVelocityY());
+      }
+      
+      if (centroid.getVelocityY() > 0) {
+        y = -centroid.getVelocityY();
+      }
+      
+      centroid.setVelocity(x, y);
+    }
+  }
+  
+  ticker++;
+}
+
 /**
  * Regenerate sketch by removing everything and adding them back again.
  */
@@ -151,7 +185,7 @@ void regenerate() {
   addParticles();
   addCentroids();
   
-  delay(1000);
+  //delay(1000);
 }
 
 /**
