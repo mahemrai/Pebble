@@ -7,9 +7,6 @@ import fisica.*;
 FWorld world;
 PostFX fx;
 
-boolean render = true;
-boolean regenerating = false;
-
 ArrayList<FCircle> centroids = new ArrayList<FCircle>();
 ArrayList<FCircle> particles = new ArrayList<FCircle>();
 
@@ -46,7 +43,6 @@ void setup() {
   
   addCentroids();
   addParticles();
-  //noLoop();
 }
 
 void draw() {
@@ -54,6 +50,7 @@ void draw() {
   
   int seconds = millis()/1000;
   
+  // in every 30 seconds restart the visualisation
   if (seconds % 30 == 0) {
     regenerate();
   }
@@ -82,6 +79,12 @@ void addCentroids() {
     float posY = random(120, 680);
     
     c.setPosition(posX, posY);
+    
+    // generate random movement speed for each particle
+    int indexX = int(random(velocityValues.length));
+    int indexY = int(random(velocityValues.length));
+    
+    c.setVelocity(velocityValues[indexX], velocityValues[indexY]);
     
     c.setGrabbable(false);
     c.setRotatable(false);
@@ -135,10 +138,11 @@ void addParticles() {
     world.add(c);
     particles.add(c);
   }
-  
-  regenerating = false;
 }
 
+/**
+ * Regenerate sketch by removing everything and adding them back again.
+ */
 void regenerate() {
   world.clear();
   world.setEdges();
@@ -152,7 +156,7 @@ void regenerate() {
 
 /**
  * Calculate distance of each particle with each centroid and update
- * particle's colour depending on what centroid it is closer to.
+ * particle's colour depending on what centroid it is closest to.
  */
 void track() {
   FCircle centroid, particle;
@@ -168,6 +172,7 @@ void track() {
       
       float distance = dist(particle.getX(), particle.getY(), centroid.getX(), centroid.getY());
       
+      // take size of each bodies into factor when measuring distance
       distance = distance - (centroid.getSize() + particle.getSize());
       
       if (distance < closestDistance) {
