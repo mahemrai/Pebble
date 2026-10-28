@@ -12,6 +12,9 @@ ArrayList<FCircle> particles = new ArrayList<FCircle>();
 
 int ticker = 0;
 
+//float simWidth  = 800;
+//float simHeight = 800;
+
 // color palette for centroids
 color[] colors = {
   #fde039,
@@ -27,8 +30,11 @@ color[] colors = {
 int[] velocityValues = {0, 2, -2, 4, -4, 6, -6};
 
 void setup() {
-  size(800, 800, P2D);
+  fullScreen(P2D);
+  //size(800, 480, P2D);
   smooth(8);
+  
+  pixelDensity(1);
   
   fx = new PostFX(this);
   
@@ -39,9 +45,49 @@ void setup() {
   world.setGravity(0,0);
   
   // no effect on velocity of moving objects
-  world.setEdgesFriction(0);
-  world.setEdgesRestitution(0);
-  world.setEdges();
+  //world.setEdgesFriction(0);
+  //world.setEdgesRestitution(0);
+  //world.setEdges();
+  
+  float wallThickness = 20;
+  float w = width;
+  float h = height;
+
+  FBox left   = new FBox(wallThickness, h + wallThickness*2);
+  left.setPosition(-wallThickness/2, h/2);
+  left.setStatic(true);
+  left.setFriction(0);
+  left.setRestitution(1.0);        // perfect bounce
+  left.setNoStroke();
+  left.setFill(0, 0);              // invisible
+  world.add(left);
+
+  FBox right  = new FBox(wallThickness, h + wallThickness*2);
+  right.setPosition(w + wallThickness/2, h/2);
+  right.setStatic(true);
+  right.setFriction(0);
+  right.setRestitution(1.0);
+  right.setNoStroke();
+  right.setFill(0, 0);
+  world.add(right);
+
+  FBox top    = new FBox(w + wallThickness*2, wallThickness);
+  top.setPosition(w/2, -wallThickness/2);
+  top.setStatic(true);
+  top.setFriction(0);
+  top.setRestitution(1.0);
+  top.setNoStroke();
+  top.setFill(0, 0);
+  world.add(top);
+
+  FBox bottom = new FBox(w + wallThickness*2, wallThickness);
+  bottom.setPosition(w/2, h + wallThickness/2);
+  bottom.setStatic(true);
+  bottom.setFriction(0);
+  bottom.setRestitution(1.0);
+  bottom.setNoStroke();
+  bottom.setFill(0, 0);
+  world.add(bottom);
   
   addCentroids();
   addParticles();
@@ -58,6 +104,17 @@ void draw() {
   }
   
   world.step();
+  
+  for (FCircle p : particles) {
+    float vx = p.getVelocityX();
+    float vy = p.getVelocityY();
+    float speed = sqrt(vx*vx + vy*vy);
+    float maxSpeed = 14;
+    if (speed > maxSpeed) {
+      p.setVelocity(vx/speed * maxSpeed, vy/speed * maxSpeed);
+    }
+  }
+  
   world.draw();
   track();
   hoverCentroids();
@@ -80,8 +137,8 @@ void addCentroids() {
     
     c.setName("Centroid");
     
-    float posX = random(120, 680);
-    float posY = random(120, 680);
+    float posX = random(120, width - 120);
+    float posY = random(120, height - 120);
     
     c.setPosition(posX, posY);
     
@@ -111,7 +168,7 @@ void addCentroids() {
  * Add particles randomly in the canvas
  */
 void addParticles() {
-  int numOfParticles = (int) random(100, 450);
+  int numOfParticles = (int) random(400, 1000);
   
   for (int i=0; i < numOfParticles; i++) {
     int radius = (int) random(2, 15);
@@ -119,8 +176,8 @@ void addParticles() {
     
     c.setName("Particle");
     
-    float posX = random(20, 780);
-    float posY = random(20, 780);
+    float posX = random(20, width - 20);
+    float posY = random(20, height - 20);
     
     c.setPosition(posX, posY);
     
@@ -133,7 +190,7 @@ void addParticles() {
     c.setVelocity(velocityValues[indexX], velocityValues[indexY]);
      
     c.setFriction(0);
-    c.setRestitution(0);
+    c.setRestitution(0.95);
     c.setDamping(0);
     c.setAngularDamping(0);
     c.setStrokeWeight(1);
@@ -217,10 +274,12 @@ void track() {
     
     if (closestCentroidIndex > -1) {
       //particle.setStrokeColor(centroids.get(closestCentroidIndex).getFillColor());
-      particle.setFillColor(centroids.get(closestCentroidIndex).getFillColor());
+      //particle.setFillColor(centroids.get(closestCentroidIndex).getFillColor());
+      color col = centroids.get(closestCentroidIndex).getFillColor();
+      particle.setFillColor(lerpColor(col, color(255), 0.15));
     } else {
       //particle.setStrokeColor(0);
-      particle.setFillColor(0);
+      particle.setFillColor(120);
     }
   }
 }
@@ -232,6 +291,11 @@ void contactStarted(FContact contact) {
   FBody body1 = contact.getBody1();
   FBody body2 = contact.getBody2();
   
+  float edgeLeft   = 5;
+  float edgeRight  = width - 5;
+  float edgeTop    = 5;
+  float edgeBottom = height - 5;
+  
   // check to ensure the collision is with edges
   if (body1.getName() != "Centroid" && body1.getName() != "Particle") {
     float contactX = contact.getX();
@@ -240,11 +304,11 @@ void contactStarted(FContact contact) {
     float newVelX = body2.getVelocityX();
     float newVelY = body2.getVelocityY();
     
-    if (contactX >= 795 || contactX <= 5) {
+    if (contactX >= edgeRight || contactX <= edgeLeft) {
       newVelX = -newVelX;
     }
     
-    if (contactY >= 795 || contactY <= 5) {
+    if (contactY >= edgeBottom || contactY <= edgeTop) {
       newVelY = -newVelY;
     }
     
@@ -259,11 +323,11 @@ void contactStarted(FContact contact) {
     float newVelX = body1.getVelocityX();
     float newVelY = body1.getVelocityY();
     
-    if (contactX >= 795 || contactX <= 5) {
+    if (contactX >= edgeRight || contactX <= edgeLeft) {
       newVelX = -newVelX;
     }
     
-    if (contactY >= 795 || contactY <= 5) {
+    if (contactY >= edgeBottom || contactY <= edgeTop) {
       newVelY = -newVelY;
     }
     
